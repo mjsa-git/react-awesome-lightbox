@@ -1,4 +1,5 @@
-import React from "react";
+import React from 'react';
+
 const DEFAULT_ZOOM_STEP  = 0.3;
 const DEFAULT_LARGE_ZOOM = 4;
 function getXY(e){
@@ -47,6 +48,10 @@ export default class Lightbox extends React.Component {
     getCurrentTitle = (s,p)  => {
         if(!s.multi) return p.title ?? "";
         return p.images?.[s.current]?.title ?? "";
+    }
+    getCurrentFilename = (s,p)  => {
+        if(!s.multi) return p.fileName ?? "";
+        return p.images?.[s.current]?.fileName ?? "";
     }
     resetZoom = () => this.setState({x:0, y:0, zoom:1});
     shockZoom = e =>{
@@ -173,6 +178,15 @@ export default class Lightbox extends React.Component {
                 break;
         }
     }
+    download = () => {
+        const link = document.createElement('a')
+        link.href = this.getCurrentImage(this.state,this.props);
+        link.download = this.getCurrentFilename(this.state,this.props)
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+
+    }
     componentDidMount(){
         document.body.classList.add("lb-open-lightbox");
         let {keyboardInteraction = true} = this.props;
@@ -195,7 +209,8 @@ export default class Lightbox extends React.Component {
             allowRotate = true,
             buttonAlign = "flex-end",
             showTitle   = true,
-            allowReset  = true
+            allowReset  = true,
+            allowDownload = false
         } = this.props;
         let {x, y, zoom, rotate, multi, loading, moving} = this.state;
         let _reset = allowReset && this.shouldShowReset();
@@ -230,6 +245,9 @@ export default class Lightbox extends React.Component {
                     <Cond condition = {allowRotate}>
                         <div title="Rotate left" className="lb-button lb-icon-rotate rotatel" onClick={()=>this.applyRotate("acw")}></div>
                         <div title="Rotate right" className="lb-button lb-icon-rotate rotater" onClick={()=>this.applyRotate("cw")}></div>
+                    </Cond>
+                    <Cond condition = {allowDownload}>
+                        <div title="Download" className="lb-button lb-icon-download" onClick={()=>this.download()}></div>
                     </Cond>
                     <div title="Close" className="lb-button lb-icon-close close" style={{order: buttonAlign === "flex-start"?"-1":"unset"}} onClick={e=>this.exit(e)}></div>
                 </div>
